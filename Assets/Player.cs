@@ -9,8 +9,23 @@ public class Player : MonoBehaviour
 {
 
     private Rigidbody2D rigidBody;
+    public SideScrollingCamera sideScrollingCamera;
 
-    public float speedX;
+    public float SpeedX
+    {
+        get
+        {
+            if (sideScrollingCamera.IsAheadOfPlayer)
+            {
+                return normalSpeed * catchUpFactor;
+            }
+            return normalSpeed;
+        }
+    }
+
+    public float normalSpeed;
+    public float catchUpFactor;
+
     public float gravityValue;
 
     public bool invertGravity;
@@ -30,7 +45,7 @@ public class Player : MonoBehaviour
         {
             return invertGravity ? gravityValue : -gravityValue;
         }
-    }    
+    }
 
     private void Start()
     {
@@ -46,6 +61,11 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             InvertGravity();
+        }
+
+        if (!sideScrollingCamera.HasViewOfPlayer)
+        {
+            Destroy(this.gameObject);
         }
     }
 
@@ -65,8 +85,10 @@ public class Player : MonoBehaviour
     {
         if (!grounded)
         {
-            rigidBody.MovePosition(transform.position + new Vector3(0, Gravity * Time.deltaTime));
+            rigidBody.MovePosition(transform.position + new Vector3(SpeedX * Time.deltaTime, Gravity * Time.deltaTime));
+            return;
         }
+        rigidBody.MovePosition(transform.position + new Vector3(SpeedX * Time.deltaTime, 0));
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
