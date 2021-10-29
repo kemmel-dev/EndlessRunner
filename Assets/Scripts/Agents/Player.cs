@@ -70,9 +70,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        StatsHolder.Distance = (int) this.transform.position.x;
         if (!sideScrollingCamera.HasViewOfPlayer)
         {
-            Destroy(this.gameObject);
+            StatsHolder.Reset();
+            SceneManager.LoadScene("SampleScene");
         }
     }
 
@@ -126,13 +128,17 @@ public class Player : MonoBehaviour
     
     public void OnFeetTriggerExit(OnTriggerDelegation delegation)
     {
-        IsGrounded = false;
+        if (delegation.Other.CompareTag("Floor"))
+        {
+            IsGrounded = false;
+        }
     }
 
-    public void OnBodyTriggerEnter(OnTriggerDelegation delegation)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (delegation.Other.CompareTag("Enemy"))
+        if (collision.collider.CompareTag("Enemy"))
         {
+            StatsHolder.Reset();
             SceneManager.LoadScene("SampleScene");
             return;
         }
