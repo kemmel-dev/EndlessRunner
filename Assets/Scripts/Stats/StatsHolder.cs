@@ -10,6 +10,8 @@ public static class StatsHolder
 
     public static int NumCoins { get; set; }
 
+    public static float TouchWindow { get; set; }
+
     internal static void Reset()
     {
         Distance = 0;

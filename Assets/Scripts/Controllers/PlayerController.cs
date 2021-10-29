@@ -8,6 +8,10 @@ public class PlayerController : MonoBehaviour
 
     private Player player;
 
+    private float touchCheckpoint;
+
+    private int numTouches = 0;
+
     private void Start()
     {
         player = GetComponent<Player>();
@@ -15,15 +19,31 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetMouseButtonDown(0))
         {
-            player.InvertGravity();
-        }
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            if (player.IsGrounded)
+            if (numTouches == 0)
             {
-                player.Jump();
+                touchCheckpoint = Time.time + StatsHolder.TouchWindow;
+            }
+            numTouches++;
+        }
+
+        if (numTouches > 0)
+        {
+            if (Time.time > touchCheckpoint)
+            {
+                if (numTouches > 1)
+                {
+                    player.InvertGravity();
+                }   
+                else
+                {
+                    if (player.IsGrounded)
+                    {
+                        player.Jump();
+                    }
+                }
+                numTouches = 0;
             }
         }
     }
