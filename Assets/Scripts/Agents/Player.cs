@@ -117,8 +117,11 @@ public class Player : MonoBehaviour
             playerMotor.Jump();
             return;
         }
-        IsGrounded = true;
-        playerMotor.StopJump();
+        if (delegation.Other.CompareTag("Floor"))
+        {
+            IsGrounded = true;
+            playerMotor.StopJump();
+        }
     }
     
     public void OnFeetTriggerExit(OnTriggerDelegation delegation)
