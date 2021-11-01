@@ -19,31 +19,17 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (numTouches == 0)
-            {
-                touchCheckpoint = Time.time + StatsHolder.TouchWindow;
-            }
-            numTouches++;
-        }
 
-        if (numTouches > 0)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (Time.time > touchCheckpoint)
+            player.InvertGravity();
+
+        }
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            if (player.IsGrounded)
             {
-                if (numTouches > 1)
-                {
-                    player.InvertGravity();
-                }   
-                else
-                {
-                    if (player.IsGrounded)
-                    {
-                        player.Jump();
-                    }
-                }
-                numTouches = 0;
+                player.Jump();
             }
         }
     }
