@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
 
 
     private Player player;
-
+    private float touchWindow = 0.5f;
     private float touchCheckpoint;
 
     private int numTouches = 0;
@@ -21,30 +21,19 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (numTouches == 0)
+            if (Time.time < touchCheckpoint)
             {
-                touchCheckpoint = Time.time + StatsHolder.TouchWindow;
+                player.InvertGravity();
+                touchCheckpoint = float.PositiveInfinity;
             }
-            numTouches++;
-        }
-
-        if (numTouches > 0)
-        {
-            if (Time.time > touchCheckpoint)
+            else
             {
-                if (numTouches > 1)
+                if (player.IsGrounded)
                 {
-                    player.InvertGravity();
-                }   
-                else
-                {
-                    if (player.IsGrounded)
-                    {
-                        player.Jump();
-                    }
+                    player.Jump();
                 }
-                numTouches = 0;
             }
+            touchCheckpoint = Time.time + touchWindow;
         }
     }
 }
