@@ -12,15 +12,32 @@ public class Player : MonoBehaviour
 
     public SideScrollingCamera sideScrollingCamera;
 
+
+    [field: SerializeField]
+    private SpriteRenderer bodyRenderer;
+
+
+    [field: SerializeField]
+    private Color playerColorNormal;
+    [field: SerializeField]
+    private Color playerColorCatchingUp;
+
     public float SpeedX
     {
         get
         {
+            float speed;
             if (sideScrollingCamera.IsAheadOfPlayer)
             {
-                return normalSpeed * catchUpFactor;
+                bodyRenderer.color = playerColorCatchingUp;
+                speed = normalSpeed * catchUpFactor;
             }
-            return normalSpeed;
+            else
+            {
+                bodyRenderer.color = playerColorNormal;
+                speed = normalSpeed;
+            }
+            return speed;
         }
     }
 
