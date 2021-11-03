@@ -14,6 +14,9 @@ public class Player : MonoBehaviour
 
 
     [field: SerializeField]
+    private SpriteRenderer headRenderer;
+
+    [field: SerializeField]
     private SpriteRenderer bodyRenderer;
 
 
@@ -29,12 +32,12 @@ public class Player : MonoBehaviour
             float speed;
             if (sideScrollingCamera.IsAheadOfPlayer)
             {
-                bodyRenderer.color = playerColorCatchingUp;
+                headRenderer.color = playerColorCatchingUp;
                 speed = normalSpeed * catchUpFactor;
             }
             else
             {
-                bodyRenderer.color = playerColorNormal;
+                headRenderer.color = playerColorNormal;
                 speed = normalSpeed;
             }
             return speed;
@@ -53,7 +56,7 @@ public class Player : MonoBehaviour
     [field: SerializeField]
     private float gravityValue;
 
-    public bool invertGravity;
+    private bool invertGravity;
 
     private Transform graphicsHolder;
     private Transform physicsHolder;
@@ -61,22 +64,36 @@ public class Player : MonoBehaviour
     private float boxColliderHeight;
     private BoxCollider2D feet;
 
-    public bool IsGrounded { get; private set; }
-
     private PlayerMotor playerMotor;
+
+    private bool _isGrounded;
+
+    private bool IsGrounded
+    {
+        get
+        {
+            return _isGrounded;
+        }
+
+        set
+        {
+            _isGrounded = value;
+        }
+    }
+
+
 
     private float Gravity
     {
         get
         {
-            float returnValue = gravityValue + playerMotor.JumpStrength;
+            float returnValue = gravityValue;
             return invertGravity ? returnValue : - returnValue;
         }
     }
 
     private void Start()
     {
-        IsGrounded = true;
         graphicsHolder = transform.Find("GFX");
         physicsHolder = transform.Find("Physics");
         boxColliderHeight = physicsHolder.transform.Find("Body").GetComponent<BoxCollider2D>().size.y;
@@ -101,7 +118,7 @@ public class Player : MonoBehaviour
 
         int signOffset = invertGravity ? 1 : -1;
 
-        transform.position = new Vector3(transform.position.x, transform.position.y + signOffset * boxColliderHeight, transform.position.z);
+        //transform.position = new Vector3(transform.position.x, transform.position.y + signOffset * boxColliderHeight, transform.position.z);
         graphicsHolder.localScale = new Vector3(graphicsHolder.localScale.x, -graphicsHolder.localScale.y, graphicsHolder.localScale.z);
         physicsHolder.localScale = new Vector3(physicsHolder.localScale.x, -physicsHolder.localScale.y, physicsHolder.localScale.z);
     }
@@ -113,18 +130,18 @@ public class Player : MonoBehaviour
         {
             if (Gravity > 0)
             {
-                playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime, Gravity * Time.deltaTime - playerMotor.JumpStrength));
+                playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime, Gravity * Time.deltaTime));
                 return;
             }
-            playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime, Gravity * Time.deltaTime + playerMotor.JumpStrength));
+            playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime, Gravity * Time.deltaTime));
             return;
         }
         if (Gravity > 0)
         {
-            playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime,  -playerMotor.JumpStrength));
+            playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime,  0));
             return;
         }
-        playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime,  playerMotor.JumpStrength));
+        playerMotor.Propel(new Vector2(SpeedX * Time.deltaTime,  0));
         return;
     }
 
@@ -138,6 +155,13 @@ public class Player : MonoBehaviour
         }
         if (delegation.Other.CompareTag("Floor"))
         {
+            transform.position = delegation.Other.bounds.ClosestPoint(transform.position);
+            // Player transform is at center of player. 
+            // Here we calculate the distance from that center by using 
+            // half the height of the bodyRenderer and multiplying that by the player scale.
+            Vector3 distanceToPlayerCenter = new Vector3(0, bodyRenderer.transform.localScale.y / 2 * transform.localScale.y);
+            transform.position += invertGravity ? -distanceToPlayerCenter : distanceToPlayerCenter;
+
             IsGrounded = true;
             playerMotor.StopJump();
         }
